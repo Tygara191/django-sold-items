@@ -1,0 +1,285 @@
+{% extends 'sold_items/base.html' %}
+{% load static %}
+{% load sold_items_misc %}
+{% load i18n %}
+{% load django_bootstrap_breadcrumbs %}
+
+{% block title %}{% blocktrans %}Климатици{% endblocktrans %}{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% breadcrumb "Климатици" sold_items.views.main_listing %}
+    {% render_breadcrumbs "template_components/breadcrumbs.html" %}
+{% endblock %}
+
+{% block bottom_extra %}
+    <script type="text/javascript" src="{% static "sold_items/js/search.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+    <form id="search-form">
+    {% autoescape off %}
+        <input type="hidden" id="ecc" name="ecc" {% auto_value 'ecc' %} />
+        <input type="hidden" id="ecw" name="ecw" {% auto_value 'ecw' %} />
+        <input type="hidden" id="ps"  name="ps"  {% auto_value 'ps' %}  />
+        <input type="hidden" id="gp"  name="gp"  {% auto_value 'gp' %}  />
+        <input type="hidden" id="man" name="man" {% auto_value 'man' %} />
+        <input type="hidden" id="pws" name="pws" {% auto_value 'pws' %} />
+    {% endautoescape %}
+    </form>
+
+    <div class="page-top-search">
+        <div class="container">
+            <div class="col-md-12 well">
+                <div class="row form-inline">
+                    <div class="col-md-12">
+                        <div class="input-group" id="search-input-group">
+                            {% autoescape off %}
+                                <input type="text" name="q" style="width: 65%" class="form-control" placeholder="Търсене" form="search-form" {% auto_value 'q' %}>
+                            {% endautoescape %}
+                            <select class="form-control" name="cat" style="width: 35%" title="Избери категория" form="search-form">
+                                <option value="">Във всички категории</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}" {% auto_selected_option 'cat' category.id %}>{{ category.cat_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row form-inline margin-top-10">
+                    <div class="col-md-12">
+                        <div class="input-group">
+                            {% autoescape off %}
+                                <input type="number" placeholder="Минимална цена(лв)" id="pmin" name="pmin" class="form-control" form="search-form" {% auto_value 'pmin' %}>
+                                <span class="input-group-addon">-</span>
+                                <input type="number" placeholder="Максимална цена(лв)" id="pmax" name="pmax" class="form-control" form="search-form" {% auto_value 'pmax' %}>
+                            {% endautoescape %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row margin-top-10">
+                    <div class="col-md-12">
+                        <input type="checkbox" id="descriptions_checkbox" name="incd" form="search-form" {% auto_checked_simple 'incd' %}><label for="descriptions_checkbox">Включи описанието в търсенето</label>
+                    </div>
+                </div>
+                <div class="row form-inline margin-top-10">
+                    <div class="col-md-12">
+                        <span class="input-group-btn">
+                            <button class="btn btn-group-lg btn-primary" type="submit" form="search-form">Търси</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="products">
+        <div class="container">
+            {% if klimatici %}
+                <div class="col-md-4 products-left">
+                    <div class="categories">
+                    <h2>филтриране</h2>
+                    {% if energy_classes_cold %}
+                        <!-- single filtering category starts here -->
+                        <ul class="cate">
+                            <li><a href="#">Енергиен клас охлаждане</a></li>
+                            <li>
+                                <ul>
+                                    {% for class in energy_classes_cold %}
+                                        <li><input type="checkbox" class="checkbox-filter" data-filter-field-id="ecc" data-id="{{ class.id }}" title="{{ class.title }}" id="ecc{{ class.id }}" {% auto_checked 'ecc' class.id %}><label for="ecc{{ class.id }}">{{ class.title }}</label></li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        </ul>
+                        <!-- single filtering category ends here -->
+                    {% endif %}
+                    {% if energy_classes_warm %}
+                        <!-- single filtering category starts here -->
+                        <ul class="cate">
+                            <li><a href="#">Енергиен клас отопление</a></li>
+                            <li>
+                                <ul>
+                                    {% for class in energy_classes_warm %}
+                                        <li><input type="checkbox" class="checkbox-filter" data-filter-field-id="ecw" data-id="{{ class.id }}" title="{{ class.title }}" id="ecw{{ class.id }}" {% auto_checked 'ecw' class.id %}><label for="ecw{{ class.id }}">{{ class.title }}</label></li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        </ul>
+                        <!-- single filtering category ends here -->
+                    {% endif %}
+                    {% if place_sizes %}
+                        <!-- single filtering category starts here -->
+                        <ul class="cate">
+                            <li><a href="#">За помещения</a></li>
+                            <li>
+                                <ul>
+                                    {% for size in place_sizes %}
+                                        <li><input type="checkbox" class="checkbox-filter" data-filter-field-id="ps" data-id="{{ size.id }}" title="{{ size }}" id="ps{{ size.id }}" {% auto_checked 'ps' size.id %}><label for="ps{{ size.id }}">{{ size }}</label></li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        </ul>
+                        <!-- single filtering category ends here -->
+                    {% endif %}
+                    {% if guarantee_periods %}
+                        <!-- single filtering category starts here -->
+                        <ul class="cate">
+                            <li><a href="#">Гаранционен период</a></li>
+                            <li>
+                                <ul>
+                                    {% for period in guarantee_periods %}
+                                        <li><input type="checkbox" class="checkbox-filter" data-filter-field-id="gp" data-id="{{ period }}" title="{{ period }} месеца" id="gp{{ period }}" {% auto_checked 'gp' period %}><label for="gp{{ period }}">{{ period }} месеца</label></li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        </ul>
+                        <!-- single filtering category ends here -->
+                    {% endif %}
+                    {% if manufacturers %}
+                        <!-- single filtering category starts here -->
+                        <ul class="cate">
+                            <li><a href="#">Производители</a></li>
+                            <li>
+                                <ul>
+                                    {% for man in manufacturers %}
+                                        <li><input type="checkbox" class="checkbox-filter" data-filter-field-id="man" data-id="{{ man.id }}" title="{{ man.name }} месеца" id="man{{ man.id }}" {% auto_checked 'man' man.id %}><label for="man{{ man.id }}">{{ man.name }}</label></li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        </ul>
+                        <!-- single filtering category ends here -->
+                    {% endif %}
+                    {% if powers %}
+                        <!-- single filtering category starts here -->
+                        <ul class="cate">
+                            <li><a href="#">Мощности</a></li>
+                            <li>
+                                <ul>
+                                    {% for power in powers %}
+                                        <li><input type="checkbox" class="checkbox-filter" data-filter-field-id="pws" data-id="{{ power }}" title="{{ power }} месеца" id="pws{{ power }}" {% auto_checked 'pws' power %}><label for="pws{{ power }}">{{ power }} BTU</label></li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        </ul>
+                        <!-- single filtering category ends here -->
+                    {% endif %}
+            </div>
+                </div>
+            {% endif %}
+            <div class="col-md-8 products-right">
+                {% if klimatici %}
+                    <div class="products-right-grid">
+                    <div class="products-right-grids">
+                        <div class="sorting">
+                            <select title="Сортиране" name="order" id="ordering" class="frm-field required sect" form="search-form">
+                                <option value="" selected>Сортиране</option>
+                                <option value="-price" {% auto_selected_option 'order' '-price' %}>Най-скъпи</option>
+                                <option value="price" {% auto_selected_option 'order' 'price' %}>Най-евтини</option>
+                                <option value="date_add" {% auto_selected_option 'order' 'date_add' %}>Най-нови</option>
+                                <option value="-date_add" {% auto_selected_option 'order' '-date_add' %}>Най-стари</option>
+                            </select>
+                        </div>
+                        <div class="clearfix"> </div>
+                    </div>
+                        </div>
+                {% endif %}
+                <!-- single row of items starts here -->
+                <div class="agile_top_brands_grids">
+                    {% if klimatici %}
+                        {% for klimatik in klimatici %}
+                            <!-- single item starts here -->
+                            <div class="col-md-4 top_brand_left">
+                                <div class="hover14 column">
+                                    <div class="agile_top_brand_left_grid">
+                                        {% if klimatik.discount %}
+                                            <div class="agile_top_brand_left_grid_pos">
+                                                <div class="offer-sign">Намаление</div>
+                                            </div>
+                                        {% endif %}
+                                        <div class="agile_top_brand_left_grid1">
+                                            <figure>
+                                                <div class="snipcart-item block">
+                                                    <div class="snipcart-thumb">
+                                                        <a href="{% url 'sold_items_details' klimatik.slug %}"><img title="" alt="" src="{{ klimatik.image.listing_klimatik.url }}"></a>
+                                                        <a href="{% url 'sold_items_details' klimatik.slug %}" class="product-heading-a"><p>{{ klimatik.title }}</p></a>
+                                                        <h4 class="prices-h4">
+                                                            {{ klimatik.price }}лв<br>
+                                                            {% if klimatik.discount %}
+                                                                <span class="text-muted">{{ klimatik.discount.old_price }}лв</span>
+                                                            {% else %}
+                                                                <span class="text-muted transparent">-</span>
+                                                            {% endif %}
+                                                        </h4>
+                                                    </div>
+                                                    <div class="snipcart-details top_brand_home_details">
+                                                        <form action="{% url 'sold_items_details' klimatik.slug %}" method="get">
+                                                            <fieldset>
+                                                                <input type="submit" value="Виж детайли" class="button">
+                                                            </fieldset>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </figure>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if forloop.counter|divisibleby:3 %}
+                            <div class="clearfix"> </div>
+                        </div>
+                        <div class="agile_top_brands_grids">
+                            {% endif %}
+                            <!-- single item ends here -->
+                        {% endfor %}
+                    {% else %}
+                        <p>Няма резултати</p>
+                    {% endif %}
+                    <div class="clearfix"> </div>
+                </div>
+                <!-- single row of items ends here -->
+                {% if klimatici.paginator.num_pages > 1 %}
+                    <nav class="numbering">
+                        <ul class="pagination paging">
+                            <!-- prev button -->
+                            {% if klimatici.has_previous %}
+                                <li>
+                                    <a href="{% url 'sold_items_listing' %}{% listing_urlparams klimatici.previous_page_number %}" aria-label="Предишна">
+                                        <span aria-hidden="true">«</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <!-- actual numbers -->
+                            {% for num_page in klimatici.paginator.num_pages|times %}
+                                {% if num_page is klimatici.number %}
+                                    <li class="active">
+                                        <a href="{% url 'sold_items_listing' %}{% listing_urlparams num_page %}" onclick="return false;">
+                                            {{ num_page }}
+                                            <span class="sr-only">(настояща)</span>
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li>
+                                        <a href="{% url 'sold_items_listing' %}{% listing_urlparams num_page %}">
+                                            {{ num_page }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            <!-- next button -->
+                            {% if klimatici.has_next %}
+                                <li>
+                                    <a href="{% url 'sold_items_listing' %}{% listing_urlparams klimatici.next_page_number %}" aria-label="Следваща">
+                                        <span aria-hidden="true">»</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            </div>
+            <div class="clearfix"> </div>
+        </div>
+    </div>
+{% endblock %}

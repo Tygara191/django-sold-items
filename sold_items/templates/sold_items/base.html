@@ -1,0 +1,26 @@
+{% load static %}
+{% load i18n %}
+{% load django_bootstrap_breadcrumbs %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Начало{% endblock title %} :: Yoooo</title>
+    <!-- for-mobile-apps -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
+    <meta name="description" content="{% block meta_description %}{% endblock %}" />
+
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    {% block body %}
+
+        {% block content %}{% endblock %}
+
+        {% block bottom_extra %}{% endblock %}
+    {% endblock %}
+</body>
+</html>

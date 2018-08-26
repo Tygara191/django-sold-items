@@ -1,0 +1,262 @@
+{% extends 'sold_items/base.html' %}
+
+{% load static %}
+{% load django_bootstrap_breadcrumbs %}
+{% load likert_fa_stars %}
+{% load i18n %}
+{% load sold_items_misc %}
+
+{% block title %}{{ klimatik.title }} :: {% blocktrans %}Климатици{% endblocktrans %}{% endblock %}
+{% block meta_description %}{{ klimatik.description }}{% endblock %}
+
+{% block head_extra %}
+    {#  Star rating  #}
+    <link rel="stylesheet" href="{% static 'sold_items/css/star-rating.min.css' %}" media="all" type="text/css" />
+    <script type="text/javascript" src="{% static "sold_items/js/star-rating.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "sold_items/js/locales/LANG.js" %}"></script>
+
+    {#  Avatar zooming  #}
+    <script type="text/javascript" src="{% static "js/jquery.elevateZoom-3.0.8.min.js" %}"></script>
+    <script>
+    $(function(){
+        $("#thumbnail").elevateZoom({
+            tint:true,
+            tintColour:'#000',
+            tintOpacity:0.5,
+            responsive: true,
+            scrollZoom: true
+        });
+        $("#id_feedback_rating").rating({
+            size: 'xs',
+            min:0,
+            max:5,
+            step:1
+        });
+        {% if feedback %}
+            $('html, body').animate({
+                scrollTop: $("#reviews").offset().top
+            }, 1000);
+        {% endif %}
+    });
+    </script>
+    <style>
+        p.w3l-ad{
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% url 'sold_items_listing' as listing_url %}
+    {% breadcrumb "Климатици" listing_url %}
+    {% breadcrumb "Детайли" "#" %}
+    {% render_breadcrumbs "template_components/breadcrumbs.html" %}
+{% endblock %}
+
+{% block content %}
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal_order">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Заявяване на поръчка</h4>
+                </div>
+                <div class="modal-body" style="text-align: center">
+                    <p>Телефон за поръчки: <strong>Yoooooooo!!</strong></p>
+                    <br />
+                    <p>Номер на климатика:</p>
+                    <h1>{{ klimatik.id }}</h1>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Затвори</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div class="products">
+		<div class="container">
+			<div class="agileinfo_single">
+				<div class="col-md-4 agileinfo_single_left">
+					<img id="thumbnail" src="{{ klimatik.image.details_klimatik.url }}" alt="{{ klimatik.title }}" class="img-responsive" data-zoom-image="{{ klimatik.image.url }}">
+				</div>
+				<div class="col-md-8 agileinfo_single_right">
+                    <h2 class="details-info">{{ klimatik.title }}</h2>
+                    {% if klimatik.rating %}
+                        <h2 class="details-rating">{{ klimatik.rating|fa_stars4 }}</h2>
+                    {% endif %}
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="w3agile_description details">
+                                <ul class="product-description-ul">
+                                    <li class="availability_sign">
+                                        {% if klimatik.available %}
+                                            <span class="label label-success">В наличност</span>
+                                        {% else %}
+                                            <span class="label label-danger">Не е в наличност</span>
+                                        {% endif %}
+                                    </li>
+                                    <li><i class="fa fa-check" aria-hidden="true"></i><span>Енергиен клас {{ klimatik.energy_class_warm }}/{{ klimatik.energy_class_cold }}</span></li>
+                                    <li><i class="fa fa-check" aria-hidden="true"></i><span>Гаранция {{ klimatik.guarantee_months }} месеца</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="snipcart-item block">
+                                <div class="snipcart-thumb agileinfo_single_right_snipcart" style="margin-bottom: 1em">
+                                    <h4 class="prices-h4">
+                                        {% if klimatik.discount %}
+                                            <span class="text-muted">{{ klimatik.discount.old_price }}лв</span>
+                                        {% else %}
+                                            <span class="text-muted transparent">-</span>
+                                        {% endif %}
+                                        {{ klimatik.price }}лв<br>
+                                    </h4>
+                                </div>
+                                {% if klimatik.discount %}
+                                    <div class="text-muted" style="font-size:18px;font-weight: bold;">
+                                        <p>Спестявате <span style="color:#fe9126">{% percentage klimatik.price klimatik.discount.old_price %}%</span>!</p>
+                                    </div>
+                                    <div class="text-muted" style="font-size:13px;margin-bottom:20px;">
+                                        <p>Намалението е валидно до {{ klimatik.discount.time_end }}</p>
+                                    </div>
+                                {% endif %}
+                                <div class="snipcart-details agileinfo_single_right_details custom-order-btn">
+                                    <form action="#" method="get" id="form_btn_order">
+                                        <fieldset>
+                                            <input type="submit" value="Поръчай" class="button">
+                                        </fieldset>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+				</div>
+				<div class="clearfix"> </div>
+			</div>
+		</div>
+	</div>
+    <div class="top-brands" style="padding-top:0;">
+		<div class="container">
+			<div class="grid_3 grid_5">
+				<div class="bs-example bs-example-tabs" role="tabpanel" data-example-id="togglable-tabs">
+					<ul id="myTab" class="nav nav-tabs" role="tablist">
+						<li role="presentation"{% if not feedback %} class="active"{% endif %}><a href="#expeditions" id="expeditions-tab" role="tab" data-toggle="tab" aria-controls="expeditions" aria-expanded="true">Описание</a></li>
+						<li role="presentation"><a href="#tours" role="tab" id="tours-tab" data-toggle="tab" aria-controls="tours">Спецификации</a></li>
+						<li role="presentation"{% if feedback %} class="active"{% endif %}><a href="#reviews" role="tab" id="reviews-tab" data-toggle="tab" aria-controls="reviews">Отзиви({{ klimatik.feedbacks.all|length }})</a></li>
+					</ul>
+					<div id="myTabContent" class="tab-content">
+						<div role="tabpanel" class="tab-pane fade{% if not feedback %} in active{% endif %}" id="expeditions" aria-labelledby="expeditions-tab">
+							<div class="agile-tp">
+								<h5>Описание</h5>
+								<p class="w3l-ad">{{ klimatik.description }}</p>
+							</div>
+						</div>
+						<div role="tabpanel" class="tab-pane fade" id="tours" aria-labelledby="tours-tab">
+							<div class="agile-tp">
+								<h5>Технически спецификации</h5>
+                                <table class="table">
+                                    <tbody>
+                                    <tr>
+                                        <td>За помещения (кв. м.)</td>
+                                        <td>{{ klimatik.places_size }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Енергиен клас отопление</td>
+                                        <td>{{ klimatik.energy_class_warm }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Енергиен клас охлаждане</td>
+                                        <td>{{ klimatik.energy_class_cold }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Мощност</td>
+                                        <td>{{ klimatik.power }} BTU</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Отдавана мощност (охлаждане) (kW)</td>
+                                        <td>{{ klimatik.output_power_cold }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Отдавана мощност (отопление) (kW)</td>
+                                        <td>{{ klimatik.output_power_warm }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Консумирана мощност (охлаждане) (kW)</td>
+                                        <td>{{ klimatik.consumed_power_cold }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Консумирана мощност (отопление) (kW)</td>
+                                        <td>{{ klimatik.consumed_power_warm }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Захранващо напрежение (V)</td>
+                                        <td>{{ klimatik.input_voltage }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Размери Ш х В х Д (вътрешно тяло) (mm)</td>
+                                        <td>{{ klimatik.inside_size }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Размери Ш х В х Д (външно тяло)  (mm)</td>
+                                        <td>{{ klimatik.outside_size }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Тегло (вътрешно тяло) (кг.)</td>
+                                        <td>{{ klimatik.inside_weight }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Тегло (външно тяло) (кг.)</td>
+                                        <td>{{ klimatik.outside_weight }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Хладилен агент</td>
+                                        <td>{{ klimatik.cold_agent }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Произход</td>
+                                        <td>{{ klimatik.origin }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+							</div>
+						</div>
+						<div role="tabpanel" class="tab-pane fade{% if feedback %} in active{% endif %}" id="reviews" aria-labelledby="tours-tab">
+                            <div class="agile-tp">
+                                <h5>Отзиви за продукта</h5>
+                            </div>
+                            {% for feedback in klimatik.feedbacks.all %}
+                                <!-- single feedback -->
+                                <div class="well well-lg">
+                                    <h4 class="media-heading text-uppercase reviews">{{ feedback.person_name }}</h4>
+                                    <ul class="media-date text-uppercase reviews list-inline">
+                                        <li class="dd">{{ feedback.date_add }}</li>
+                                    </ul>
+                                    <p class="media-comment">
+                                        {{ feedback.feedback_text }}
+                                    </p>
+                                    <h4 class="media-rating">{{ feedback.feedback_rating|fa_stars4 }}</h4>
+                                </div>
+                                <!-- /single feedback -->
+                            {% endfor %}
+                            {% if form %}
+                                <div class="row" style="margin-top:40px;">
+                                    <div class="col-md-6">
+                                        <div class="well well-sm">
+                                            <form method="POST">
+                                                {% csrf_token %}
+                                                {{ form }}
+                                                <input type="submit" class="btn btn-primary" value="Изпрати отзива">
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

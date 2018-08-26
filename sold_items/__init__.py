@@ -1,0 +1,1 @@
+default_app_config = 'sold_items.apps.SoldItemsConfig'
